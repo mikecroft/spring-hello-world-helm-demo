@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
 import org.springframework.web.bind.annotation.*;
@@ -8,9 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class DemoApplication {
 
-	@GetMapping("/")
+    @Value("${environment.type}")
+    private String environment;
+
+	@GetMapping("/hello")
 	String home() {
-		return "Spring is here!";
+		return "hello from "+ " " + environment;
 	}
 
 	public static void main(String[] args) {
