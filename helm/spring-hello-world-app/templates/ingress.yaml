@@ -30,8 +30,9 @@ spec:
   {{- end }}
 {{- end }}
   rules:
+  {{ $base := (print "." .Values.ingressBase) }}
   {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ (print .host $base) | quote }}
       http:
         paths:
         {{- range .paths }}

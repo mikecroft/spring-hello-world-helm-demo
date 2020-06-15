@@ -18,11 +18,12 @@ service:
   type: LoadBalancer
   port: 8080
 
+ingressBase: apps.openshift.ebms.tv
 ingress:
   enabled: true
   annotations: {}
   hosts:
-    - host: chart-example.local
+    - host: spring-hello-world
       paths: ["/"]
   tls: []
 
