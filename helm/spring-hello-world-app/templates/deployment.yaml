@@ -33,8 +33,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.sck }}
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springProfilesActive | quote}}
+          {{- if .Values.sck }}
             - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
               value: "{{ include "spring-boot.fullname" . }}"
             - name: MANAGEMENT_ENDPOINT_RESTART_ENABLED
