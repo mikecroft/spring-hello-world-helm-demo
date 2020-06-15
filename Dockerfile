@@ -1,10 +1,5 @@
-FROM maven:3-jdk-8-alpine
+FROM fabric8/java-alpine-openjdk8-jre
 
-WORKDIR /usr/src/app
-
-COPY . /usr/src/app
-RUN mvn package
-
-ENV PORT 5000
-EXPOSE $PORT
-CMD [ "sh", "-c", "mvn -Dserver.port=${PORT} spring-boot:run" ]
+COPY target/*.jar /deployments/app.jar
+EXPOSE 8080
+ENTRYPOINT [ "java", "-jar", "/deployments/app.jar" ]

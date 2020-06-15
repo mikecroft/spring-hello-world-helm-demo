@@ -3,7 +3,7 @@ replicaCount: 1
 
 # Override these settings and use your container image.
 image:
-  repository: alexandreroman/hello
+  repository: mikecroft/spring-hello-world-app
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -16,7 +16,15 @@ imageCredentials:
 # Set service type: LoadBalancer, ClusterIP, NodePort
 service:
   type: LoadBalancer
-  port: 80
+  port: 8080
+
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: ["/"]
+  tls: []
 
 # Set to false to disable Prometheus support.
 monitoring: true
