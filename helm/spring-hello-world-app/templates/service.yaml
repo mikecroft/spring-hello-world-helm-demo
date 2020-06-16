@@ -3,10 +3,7 @@ kind: Service
 metadata:
   name: {{ include "spring-boot.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "spring-boot.name" . }}
-    helm.sh/chart: {{ include "spring-boot.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "spring-boot.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
