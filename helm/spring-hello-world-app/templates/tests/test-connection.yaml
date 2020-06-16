@@ -14,7 +14,7 @@ spec:
         limits:
             cpu: "1"
         requests:
-            cpu: "1"
+            cpu: "0.5"
       command: ['sh']
       args: ['-c','test \\"$(wget -qO- http://{{ index (index .Values.ingress.hosts 0) "host" }}.{{ .Values.ingressBase }}/hello)\\" = \\"hello from  {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
   restartPolicy: Never
