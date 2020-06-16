@@ -16,5 +16,5 @@ spec:
         requests:
             cpu: "1"
       command: ['sh']
-      args: ['-c','test \\"$(wget -qO- http://{{ include "spring-boot.fullname" . }}:{{ .Values.service.port }}/hello)\\" = \\"hello from  {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
+      args: ['-c','test \\"$(wget -qO- http://{{ index (index .Values.ingress.hosts 0) "host" }}.{{ .Values.ingressBase }}/hello)\\" = \\"hello from  {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
   restartPolicy: Never
