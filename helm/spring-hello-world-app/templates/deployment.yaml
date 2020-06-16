@@ -47,16 +47,11 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: http
-            initialDelaySeconds: 60
           readinessProbe:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 20
+            initialDelaySeconds: 90
 {{- if .Values.imageCredentials.registry }}
 ---
 apiVersion: v1

@@ -31,12 +31,12 @@ export DOCKER_PASSWORD=$(aws ecr get-login-password --region eu-west-1)
 # Project and app properties
 export PROJECT=demo-deployment
 export RELEASE=demo-release
-export FRIENDLY_NAME=cmpp-sanmanager # Spaces in the name might cause expansion issues
+# export FRIENDLY_NAME=cmpp-sanmanager # Spaces in the name might cause expansion issues
 export CONTAINER_IMAGE=014056181913.dkr.ecr.eu-west-1.amazonaws.com/cmpp-workers:sanmanager_uk-rl-53_qb-rc-215-e628983
 
 # ConfigMap properties. Path is for the *pod*, not local
-export CONFIG_PATH=/opt/cmpp/application.properties
-export CONFIG_FILENAME=application.properties
+# export CONFIG_PATH=/opt/cmpp/application.properties
+# export CONFIG_FILENAME=application.properties
 
 ###############################################################################
 
