@@ -6,7 +6,6 @@ metadata:
     {{- include "spring-boot.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   containers:
     - name: bash-test
@@ -17,6 +16,6 @@ spec:
         requests:
             cpu: "0.5"
       command: ['sh']
-      # args: ['-c','test \\"$(wget -qO- http://{{ index (index .Values.ingress.hosts 0) "host" }}.{{ .Values.ingressBase }}/hello)\\" = \\"hello from  {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
-      args: ['-c','test \\"$(wget -qO- http://{{ include "spring-boot.fullname" . }}:{{ .Values.service.port }}/hello)\\" = \\"hello from  {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
+      # args: ['-c','test \\"$(wget -qO- http://{{ index (index .Values.ingress.hosts 0) "host" }}.{{ .Values.ingressBase }}/hello)\\" = \\"hello from {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
+      args: ['-c','test \\"$(wget -qO- http://{{ include "spring-boot.fullname" . }}:{{ .Values.service.port }}/hello)\\" = \\"hello from {{ if not .Values.springProfilesActive }}default{{ else }}{{ .Values.springProfilesActive }}{{ end }}\\"']
   restartPolicy: Never

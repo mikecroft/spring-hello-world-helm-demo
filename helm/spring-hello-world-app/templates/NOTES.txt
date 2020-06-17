@@ -1,53 +1,8 @@
-Thank you for installing {{ .Chart.Name }}.
-Your release is named {{ .Release.Name }}.
-
-Go to https://github.com/alexandreroman/k8s-with-no-dockerfile-no-yaml-files
-to find a sample app using Spring Cloud Kubernetes.
-
-To learn more about the release, try:
-
-  $ helm status {{ .Release.Name }}
-  $ helm get {{ .Release.Name }}
-
-Edit app configuration using this command:
-
-  $ kubectl -n {{ .Release.Namespace }} edit configmap {{ include "spring-boot.fullname" . }}
-
-To scale out this app (add/remove instances), try:
-
-  $ kubectl -n {{ .Release.Namespace }} scale --replicas 3 deployment {{ include "spring-boot.fullname" . }}
-
-{{- if eq .Values.service.type "LoadBalancer" }}
-
-Find public app endpoint here (see EXTERNAL-IP):
-
-  $ kubectl -n {{ .Release.Namespace }} get service {{ include "spring-boot.fullname" . }}
-
-{{- end }}
-
-Remove this release from your cluster using this command:
-
-  $ helm uninstall {{ .Release.Name }}
-
-
-1. Get the application URL by running these commands:
 {{- if .Values.ingress.enabled }}
+1. The application endpoint is:
 {{- range $host := .Values.ingress.hosts }}
   {{- range .paths }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ . }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}.{{ $.Values.ingressBase }}{{ . }}
   {{- end }}
 {{- end }}
-{{- else if contains "NodePort" .Values.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "cmpp-sanmanager.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if contains "LoadBalancer" .Values.service.type }}
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "cmpp-sanmanager.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "cmpp-sanmanager.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.service.port }}
-{{- else if contains "ClusterIP" .Values.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "cmpp-sanmanager.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:80
 {{- end }}

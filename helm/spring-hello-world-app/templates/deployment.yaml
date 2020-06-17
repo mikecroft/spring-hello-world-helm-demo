@@ -51,7 +51,8 @@ spec:
             httpGet:
               path: /actuator/health
               port: http
-            initialDelaySeconds: 90
+            initialDelaySeconds: 30
+            periodSeconds: 5
           resources:
             limits:
                 cpu: "1"
