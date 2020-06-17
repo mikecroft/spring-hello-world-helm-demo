@@ -172,51 +172,6 @@ if [ $# -eq 2 ] ; then
             exit 1
         fi
     done
-    # ###############################
-
-    # # Install to TEST
-
-    # ###############################
-
-    # printf "    Installing chart in ${TARGET}.............................. "
-    #     install ${TARGET}
-    # [[ $? -eq 0 ]] && printf "Success!\n" || printf "Fail!\n"
-
-
-    # printf "    Testing chart in ${TARGET}................................. "
-    #     chart_test ${TARGET}
-    
-    # # Did it work?
-    # if [ $? -eq 0 ] ; then
-    #     printf "Success!\n" 
-    # else
-    #     printf "Fail!\n\nAborting script\n"
-    #     exit 1
-    # fi
-
-    # ###############################
-  
-    # # Install to PROD
-
-    # ###############################
-
-    # printf "    Installing chart in ${TARGET}.............................. "
-    #     install ${TARGET}
-    # [[ $? -eq 0 ]] && printf "Success!\n" || printf "Fail!\n"
-
-
-    # printf "    Testing chart in ${TARGET}................................. "
-    #     chart_test ${TARGET}
-    
-    # # Did it work?
-    # if [ $? -eq 0 ] ; then
-    #     printf "Success!\n" 
-    # else
-    #     printf "Fail!\n\nAborting script\n"
-    #     exit 1
-    # fi
-
-    # ###############################
 
     echo "    Done!"
     
