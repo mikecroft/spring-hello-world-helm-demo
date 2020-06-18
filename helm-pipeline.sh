@@ -24,8 +24,7 @@ export AWS_DEFAULT_REGION=eu-west-1
 export SECRET_NAME=aws-ecr-pull-secret
 export DOCKER_REGISTRY_SERVER=014056181913.dkr.ecr.eu-west-1.amazonaws.com/cmpp-workers
 export DOCKER_USER=AWS
-# export DOCKER_PASSWORD=$(aws ecr get-login-password --region eu-west-1)
-export DOCKER_PASSWORD=changeme
+export DOCKER_PASSWORD=$(aws ecr get-login-password --region eu-west-1)
 
 # Project and app properties
 export PROJECT=demo-deployment
