@@ -67,35 +67,49 @@ function init {
 
 function install {
 
-    # To be used to rename the kubecontext. The format here is:
-    #     namespace/cluster/user
-    # The actual namespaces for each are ${PROJECT}-dev, ${PROJECT}-test
-    # etc but if we were doing this "for real" then the namespace would stay
-    # the same and only the cluster would change.
-    # Since these are only references to the actual kubecontext, it doesn't
-    # matter.
-    [[ $1 ]] && target="${PROJECT}/$1/$(oc whoami)"
-
-    # Only set context if we have a target environment
-    [[ $1 ]] && kubecontext="--kube-context $target"
-    [[ $1 ]] && values="-f helm/spring-hello-world-app/envs/values-$1.yaml"
-
-    helm ${kubecontext} install ${RELEASE} helm/spring-hello-world-app ${values} --wait  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
+    helm ${KUBECONTEXT} install ${RELEASE} helm/spring-hello-world-app ${values} --wait  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
 
 }
 
 function chart_test {
 
-    [[ $1 ]] && target="${PROJECT}/$1/$(oc whoami)"
-    
-    # Only set context if we have a target environment
-    [[ $1 ]] && kubecontext="--kube-context=$target"
-    [[ $1 ]] && occontext="--context=$target"
-
-    oc ${occontext} delete pod ${RELEASE}-spring-hello-world-app-test-connection >/dev/null 2>&1
-    helm ${kubecontext} test ${RELEASE} | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
+    oc ${OCCONTEXT} delete pod ${RELEASE}-spring-hello-world-app-test-connection >/dev/null 2>&1
+    helm ${KUBECONTEXT} test ${RELEASE} | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
 
 }
+
+function app_test {
+
+    expected="hello from $1"
+
+    # Get endpoint under test via oc
+    endpoint=$(oc ${OCCONTEXT} get route --selector=app.kubernetes.io/instance=${RELEASE} -o=jsonpath='{.items[0].spec.host}')
+    
+    actual=$(wget -qO- http://${endpoint}/hello)
+
+    printf "    #    %-79s  #\n" "       Expected:    ${expected}"
+    printf "    #    %-79s  #\n" "       Actual:      ${actual}"
+    printf "    #    %-79s  #\n" " "
+
+    case "$1" in
+        dev)
+            # Run dev smoke test
+            test "${actual}" = "${expected}"
+            ;;
+        test)
+            # Run integration test suite
+            test "${actual}" = "${expected}"
+            ;;
+        prod)
+            # Run validation check
+            test "${actual}" = "${expected}"
+            ;;
+        *)
+            false
+    esac
+
+}
+
 
 function usage {
 
@@ -145,28 +159,45 @@ if [ $# -eq 2 ] ; then
     printf "    #    %-79s  #\n" " "
     printf "    #    %-79s  #\n" "INFO:  Initialising..."
     printf "    #    %-79s  #\n" " "
+    
     init ${PROJECT}
-    printf "    #    %-79s  #\n" " "
+
     printf "    #    %-79s  #\n" " "
     printf "    #######################################################################################\n"
+
     ###############################
 
     # Install to dev, test, prod
 
     ###############################
-    for TARGET in "dev" "test" "prod"
+
+    for CLUSTER in "dev" "test" "prod"
     do
+        # To be used to rename the kubecontext. The format here is:
+        #     namespace/cluster/user
+        # The actual namespaces for each are ${PROJECT}-dev, ${PROJECT}-test
+        # etc but if we were doing this "for real" then the namespace would stay
+        # the same and only the cluster would change.
+        # Since these are only references to the actual kubecontext, it doesn't
+        # matter.
+        export TARGET="${PROJECT}/${CLUSTER}/$(oc whoami)"
+        export KUBECONTEXT="--kube-context ${TARGET}"
+        export OCCONTEXT="--context=${TARGET}"
+        export VALUES="-f helm/spring-hello-world-app/envs/values-${CLUSTER}.yaml"
+
         printf "    #######################################################################################\n"
         printf "    #    %-79s  #\n" " "
-        printf "    #    %-79s  #\n" "INFO:  Installing chart in ${TARGET}"
+        printf "    #    %-79s  #\n" "INFO:  Installing chart in ${CLUSTER}..."
         printf "    #    %-79s  #\n" " "
-            install ${TARGET}
+        
+            install ${CLUSTER}
         
         printf "    #    %-79s  #\n" " "
         printf "    #    %-79s  #\n" " "
-        printf "    #    %-79s  #\n" "INFO:  Testing chart in ${TARGET}"
+        printf "    #    %-79s  #\n" "INFO:  Validating chart in ${CLUSTER}..."
         printf "    #    %-79s  #\n" " "
-            chart_test ${TARGET}
+            
+            chart_test ${CLUSTER}
         
         # Did it work?
         if [ $? -eq 0 ] ; then
@@ -174,7 +205,6 @@ if [ $# -eq 2 ] ; then
             printf "    #    %-79s  #\n" " "
             printf "    #    %-79s  #\n" "INFO:  Successfully installed!"
             printf "    #    %-79s  #\n" " "
-            printf "    #######################################################################################\n"
         else
             printf "    #    %-79s  #\n" "ERROR: Failed to install!"
             printf "    #    %-79s  #\n" "       Aborting script"
@@ -182,6 +212,28 @@ if [ $# -eq 2 ] ; then
             printf "    #######################################################################################\n"
             exit 1
         fi
+
+        printf "    #    %-79s  #\n" " "
+        printf "    #    %-79s  #\n" "INFO:  Testing application in ${CLUSTER}..."
+        printf "    #    %-79s  #\n" " "
+        
+            app_test ${CLUSTER}
+
+        # Did it work?
+        if [ $? -eq 0 ] ; then
+            printf "    #    %-79s  #\n" " "
+            printf "    #    %-79s  #\n" "INFO:  Application test PASSED!"
+            printf "    #    %-79s  #\n" " "
+            printf "    #######################################################################################\n"
+        else
+            printf "    #    %-79s  #\n" " "
+            printf "    #    %-79s  #\n" "ERROR: Application test FAILED!"
+            printf "    #    %-79s  #\n" "       Aborting script"
+            printf "    #    %-79s  #\n" " "        
+            printf "    #######################################################################################\n"
+            exit 1
+        fi
+
     done
     
 else

@@ -1,0 +1,5 @@
+= Spring Boot Helm Pipeline
+
+This project is a simple Spring Boot _Hello World_ application to demonstrate how a CI/CD pipeline might make best use of the link:https://helm.sh[Helm package manager].
+
+The Helm chart was initialised using a link:https://github.com/alexandreroman/spring-boot-helm-starter[starter chart for Spring Boot] made by a Pivotal employee.
