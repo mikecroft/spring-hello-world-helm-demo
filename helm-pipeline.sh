@@ -66,7 +66,7 @@ function init {
 
 function install {
 
-    helm ${KUBECONTEXT} install ${RELEASE} helm/spring-hello-world-app ${values} --wait 2>&1  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
+    helm ${KUBECONTEXT} install ${RELEASE} helm/spring-hello-world-app ${values} --wait --timeout 30s 2>&1  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
 
 }
 
