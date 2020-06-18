@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spring-boot.fullname" . }}
+  labels:
+    {{- include "spring-boot.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "spring-boot.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "spring-boot.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- if .Values.monitoring }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port:  "8080"
+      {{- end }}
+    spec:
+      {{- if .Values.imageCredentials.registry }}
+      imagePullSecrets:
+        - name: {{ include "spring-boot.fullname" . }}-registry
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springProfilesActive | quote}}
+          {{- if .Values.sck }}
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_NAME
+              value: "{{ include "spring-boot.fullname" . }}"
+            - name: MANAGEMENT_ENDPOINT_RESTART_ENABLED
+              value: "true"
+            - name: SPRING_CLOUD_KUBERNETES_RELOAD_ENABLED
+              value: "true"
+            - name: SPRING_CLOUD_KUBERNETES_RELOAD_STRATEGY
+              value: "refresh"
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          resources:
+            limits:
+                cpu: "1"
+                memory: "1Gi"
+            requests:
+                cpu: "0.5"
+                memory: "512Mi"
+{{- if .Values.imageCredentials.registry }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "spring-boot.fullname" . }}-registry
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ template "imagePullSecret" . }}
+{{- end }}

@@ -28,6 +28,6 @@ public class DemoApplicationTests {
 	@Test
 	public void homeResponse() {
 		String body = this.restTemplate.getForObject("/hello", String.class);
-		assertThat(body).isEqualTo("Hello " + environment + " World!");
+		assertThat(body).isEqualTo("hello from default");
 	}
 }

@@ -14,7 +14,7 @@ public class DemoApplication {
 
 	@GetMapping("/hello")
 	String home() {
-		return "Hello " + environment + " World!";
+		return "hello from " + environment;
 	}
 
 	public static void main(String[] args) {
