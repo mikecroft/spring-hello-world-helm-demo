@@ -66,14 +66,14 @@ function init {
 
 function install {
 
-    helm ${KUBECONTEXT} install ${RELEASE} helm/spring-hello-world-app ${values} --wait  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
+    helm ${KUBECONTEXT} install ${RELEASE} helm/spring-hello-world-app ${values} --wait 2>&1  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
 
 }
 
 function chart_test {
 
     oc ${OCCONTEXT} delete pod ${RELEASE}-spring-hello-world-app-test-connection >/dev/null 2>&1
-    helm ${KUBECONTEXT} test ${RELEASE} | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
+    helm ${KUBECONTEXT} test ${RELEASE} 2>&1  | tr '\n' '\0' | xargs -0 printf "    #           %-70s    #\n"
 
 }
 
