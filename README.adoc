@@ -297,5 +297,5 @@ public class DemoApplication {
 -----
 
 . Sets the environment type based on the value set in application properties.
-. Returns the string "Hello from ${environemnt}" to the '/hello' endpoint
+. Returns the string "Hello from ${environment}" to the '/hello' endpoint
 
