@@ -3,3 +3,246 @@
 This project is a simple Spring Boot _Hello World_ application to demonstrate how a CI/CD pipeline might make best use of the link:https://helm.sh[Helm package manager].
 
 The Helm chart was initialised using a link:https://github.com/alexandreroman/spring-boot-helm-starter[starter chart for Spring Boot] made by a Pivotal employee.
+
+== Repository Structure
+
+[source,bash]
+----
+.
+├── build-and-push.sh
+├── Dockerfile
+├── helm
+│   └── spring-hello-world-app
+│       ├── Chart.yaml
+│       ├── envs
+│       │   ├── values-dev.yaml
+│       │   ├── values-prod.yaml
+│       │   └── values-test.yaml
+│       ├── templates
+│       │   ├── configmap.yaml
+│       │   ├── deployment.yaml
+│       │   ├── _helpers.tpl
+│       │   ├── ingress.yaml
+│       │   ├── NOTES.txt
+│       │   ├── rbac.yaml
+│       │   ├── service.yaml
+│       │   └── tests
+│       │       └── test-connection.yaml
+│       └── values.yaml
+├── helm-pipeline.sh
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+├── README.adoc
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── example
+│   │   │           └── demo
+│   │   │               └── DemoApplication.java
+│   │   └── resources
+│   │       ├── application-dev.properties
+│   │       ├── application-prod.properties
+│   │       ├── application.properties
+│   │       └── application-test.properties
+│   └── test
+│       └── java
+│           └── com
+│               └── example
+│                   └── demo
+│                       └── DemoApplicationTests.java
+└── target
+
+----
+
+
+== build-and-push.sh
+
+[source, bash]
+-----
+export APP=spring-hello-world-app
+export REG=<Your image repo URL>
+
+mvn clean package -DskipTests
+docker build -t ${APP} .
+docker tag ${APP}:latest ${REG}/${APP}:latest
+docker push ${REG}/${APP}:latest
+-----
+
+The current implementation of the hello-world-app uses an image currently located at `docker.io/mikecroft/spring-hello-world-app`. If this endpoint is inaccessible, it may be beneficial to re-build the app, and push it to a local internal registry. The `build-and-push.sh` script does this for you, with the user only needing to update the `REG` variable to their internal image repository.
+
+
+== Helm - spring-boot-hello-world-app
+
+== What is Helm? 
+
+__ Helm helps you manage Kubernetes applications — Helm Charts help you define, install, and upgrade even the most complex Kubernetes application.__
+
+*Three Big Concepts*
+
+__A *Chart* is a Helm package. It contains all of the resource definitions necessary to run an application, tool, or service inside of a Kubernetes cluster. Think of it like the Kubernetes equivalent of a Homebrew formula, an Apt dpkg, or a Yum RPM file.__
+
+__A *Repository* is the place where charts can be collected and shared. It's like Perl's CPAN archive or the Fedora Package Database, but for Kubernetes packages.__
+
+__A *Release* is an instance of a chart running in a Kubernetes cluster. One chart can often be installed many times into the same cluster. And each time it is installed, a new release is created. Consider a MySQL chart. If you want two databases running in your cluster, you can install that chart twice. Each one will have its own release, which will in turn have its own release name.__
+
+__With these concepts in mind, we can now explain Helm like this:__
+
+__ Helm installs charts into Kubernetes, creating a new release for each installation. And to find new charts, you can search Helm chart repositories. __
+
+Source: https://helm.sh/[helm.sh]
+
+== Helm - spring-boot-hello-world-app
+
+Following is the Helm chart used to deploy the hello-world-app.
+
+=== Helm Structure
+
+[source, bash]
+-----
+├── helm
+│   └── spring-hello-world-app
+│       ├── Chart.yaml
+│       ├── envs
+│       │   ├── values-dev.yaml
+│       │   ├── values-prod.yaml
+│       │   └── values-test.yaml
+│       ├── templates
+│       │   ├── configmap.yaml
+│       │   ├── deployment.yaml
+│       │   ├── _helpers.tpl
+│       │   ├── ingress.yaml
+│       │   ├── NOTES.txt
+│       │   ├── rbac.yaml
+│       │   ├── service.yaml
+│       │   └── tests
+│       │       └── test-connection.yaml
+│       └── values.yaml
+-----
+
+=== chart.yml
+[source, yaml]
+-----
+apiVersion: v2                                 #1
+appVersion: 0.1.0                              #2
+description: A Helm chart for Kubernetes       #3
+name: spring-hello-world-app                   #4
+type: application                              #5
+version: 0.1.0                                 #6
+-----
+
+`chart.yml` defines some metadata about our helm chart. The `chart.yaml` file is required for a chart and can be populated using the fields found https://helm.sh/docs/topics/charts/[here]. The fields we're using are described below.
+
+. The chart API version
+. The name of the chart
+. A single-sentence description of this project
+. The name of the chart
+. The type of the chart 
+. A Semantic Versioning 2 version
+
+=== Values.yml and 'env' directory
+The `Values.yml` provides default configuration data for the helm templates to use and is available in a structured format.
+
+The `envs` directory contains our unique `values-${stage}.yaml` files for each deployment stage. The global `values.yaml` however contains the default values file. When running a helm install it is possible to specifiy a particular `values.yaml`, and if no specific file is specified, the global one will be used.
+
+You can specify a values file using `helm install -f custom-values-file.yml`
+
+=== values.yml explained
+
+The `values.yml` used for this deployment is as follows.
+
+[source, yaml]
+-----
+# Set how many application instances to run.
+replicaCount: 1
+
+# Override these settings and use your container image.
+image:
+  repository: mikecroft/spring-hello-world-app                #1
+  tag: latest
+  pullPolicy: Always
+
+# Set image pull secrets (in case you're using a private container registry).
+imageCredentials:
+  registry: # gcr.io
+  username: # oauth2accesstoken
+  password: # $(gcloud auth print-access-token)
+
+# Set service type: LoadBalancer, ClusterIP, NodePort
+service:
+  type: LoadBalancer
+  port: 8080
+
+ingressBase: apps.openshift.ebms.tv
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: spring-hello-world
+      paths: ["/"]
+  tls: []
+
+# Set to false to disable Prometheus support.
+monitoring: true
+
+# Set to false to disable Spring Cloud Kubernetes support.
+sck: true
+
+# Set configuration properties.
+config:
+  foo: bar
+
+-----
+
+IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository.
+
+The custom `values-${stage}` is as follows. The main difference between the default `values.yml` and the specific stage ones is the `springProfilesActive` value is set. This value sets the spring profile within the app itself to the desited stage.
+
+[source, yaml]
+-----
+# Set how many application instances to run.
+replicaCount: 1
+
+# Override these settings and use your container image.
+image:
+  repository: mikecroft/spring-hello-world-app               #1
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Set image pull secrets (in case you're using a private container registry).
+imageCredentials:
+  registry: # gcr.io
+  username: # oauth2accesstoken
+  password: # $(gcloud auth print-access-token)
+
+# Set service type: LoadBalancer, ClusterIP, NodePort
+service:
+  type: LoadBalancer
+  port: 8080
+
+ingressBase: apps.openshift.ebms.tv
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: spring-hello-world-dev
+      paths: ["/"]
+  tls: []
+
+# Set to false to disable Prometheus support.
+monitoring: true
+
+# Set to false to disable Spring Cloud Kubernetes support.
+sck: true
+
+# Set Spring active profile
+springProfilesActive: dev || test || prod
+
+# Set configuration properties.
+config:
+  foo: bar
+-----
+
+IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository.
+
