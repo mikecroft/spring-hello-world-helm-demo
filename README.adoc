@@ -265,3 +265,37 @@ The pipeline begins by taking the project name and project release name as argum
 . Runs the app_test function to check the expected deployed string against the actual.
 . Repeats step 4,5,6 with the arguments test and prod
 
+== The hello-world-app
+
+The hello world app exposes the '/hello' endpoint mapping with a message from a specified environment. eg: dev, test or prod.
+
+[source, java]
+-----
+package com.example.demo;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.*;
+import org.springframework.boot.autoconfigure.*;
+import org.springframework.web.bind.annotation.*;
+
+@SpringBootApplication
+@RestController
+public class DemoApplication {
+
+    @Value("${environment.type}")                   #1
+    private String environment;
+ 
+	@GetMapping("/hello")                           #2                    
+	String home() {
+		return "hello from " + environment;
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
+}
+-----
+
+. Sets the environment type based on the value set in application properties.
+. Returns the string "Hello from ${environemnt}" to the '/hello' endpoint
+
