@@ -189,7 +189,7 @@ replicaCount: 1
 
 # Override these settings and use your container image.
 image:
-  repository: mikecroft/spring-hello-world-app                #1
+  repository: mikecroft/spring-hello-world-app                
   tag: latest
   pullPolicy: Always
 
@@ -206,7 +206,7 @@ service:
 
 ingressBase: apps.openshift.ebms.tv
 ingress:
-  enabled: true
+  enabled: true                                              #1
   annotations: {}
   hosts:
     - host: spring-hello-world
@@ -225,56 +225,21 @@ config:
 
 -----
 
-IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository.
+IMPORTANT: Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository. 
 
-The custom `values-${stage}` is as follows. The main difference between the default `values.yml` and the specific stage ones is the `springProfilesActive` value is set. This value sets the spring profile within the app itself to the desited stage.
+. If `ingress.enabled` is set to true, an openshift Route/ Ingress object will be made. This will expose the app endpoint and make it resolvable outside the cluster. 
+
+*values-${stage}.yml files*
+
+The main difference between the default `values.yml` and the specific stage files is the `springProfilesActive` value is set. This value sets the spring profile within the app itself to the desired stage. 
 
 [source, yaml]
 -----
-# Set how many application instances to run.
-replicaCount: 1
-
-# Override these settings and use your container image.
-image:
-  repository: mikecroft/spring-hello-world-app               #1
-  tag: latest
-  pullPolicy: IfNotPresent
-
-# Set image pull secrets (in case you're using a private container registry).
-imageCredentials:
-  registry: # gcr.io
-  username: # oauth2accesstoken
-  password: # $(gcloud auth print-access-token)
-
-# Set service type: LoadBalancer, ClusterIP, NodePort
-service:
-  type: LoadBalancer
-  port: 8080
-
-ingressBase: apps.openshift.ebms.tv
-ingress:
-  enabled: true
-  annotations: {}
-  hosts:
-    - host: spring-hello-world-dev
-      paths: ["/"]
-  tls: []
-
-# Set to false to disable Prometheus support.
-monitoring: true
-
-# Set to false to disable Spring Cloud Kubernetes support.
-sck: true
 
 # Set Spring active profile
 springProfilesActive: dev || test || prod
 
-# Set configuration properties.
-config:
-  foo: bar
 -----
-
-IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository.
 
 === Helm Templates
 
