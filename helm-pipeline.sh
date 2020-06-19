@@ -127,6 +127,16 @@ function usage {
 
     This example will create a chart release in \"my-new-project\" called
     \"testing-new-feature-spring-hello-world-app\"
+
+    To clean up the helm deployments created by the pipeline run the following.
+
+    Usage:
+        $0 \$PROJECT_NAME \$RELEASE_NAME cleanup
+    Example:
+        # Uninstall the sanmanager chart in \"my-new-project\"
+        $0 my-new-project testing-new-feature cleanup
+
+    This example will perform a helm uninstall on each deployment.
     "
 }
 

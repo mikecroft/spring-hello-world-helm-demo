@@ -4,6 +4,36 @@ This project is a simple Spring Boot _Hello World_ application to demonstrate ho
 
 The Helm chart was initialised using a link:https://github.com/alexandreroman/spring-boot-helm-starter[starter chart for Spring Boot] made by a Pivotal employee.
 
+= Usage
+
+== Run Pipeline
+
+Script to create a project and install the sample spring-hello-world-app Helm chart to it. It takes the name of a project and a `"Release name"`. All Helm chart installations are known as `"Releases"` and the resulting resources will be known as `"$RELEASE_NAME-$CHART_NAME"`. The script will run the app through 3 different stages, performing a dev, test and prod deployment.
+
+    Usage:
+        ./helm-pipeline.sh $PROJECT_NAME $RELEASE_NAME
+
+    Example:
+        # Install the sanmanager chart in "my-new-project"
+        ./helm-pipeline my-new-project testing-new-feature
+
+This example will create a chart release in `"my-new-project"` called
+`"testing-new-feature-spring-hello-world-app"`
+
+== Cleanup Pipeline
+
+To clean up the helm deployments created by the pipeline run the following.
+
+    Usage:
+        ./helm-pipeline.sh $PROJECT_NAME $RELEASE_NAME cleanup
+
+    Example:
+        # Uninstall the sanmanager chart in "my-new-project"
+        ./helm-pipeline my-new-project testing-new-feature cleanup
+
+    This example will perform a `helm uninstall` on each deployment.
+
+
 == Repository Structure
 
 [source,bash]
@@ -248,4 +278,4 @@ IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt
 
 === Helm Templates
 
-Helm templates are based off of GoLang templates.
+Templates generate manifest files, which are YAML-formatted resource descriptions that Kubernetes can understand. 
