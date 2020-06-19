@@ -6,7 +6,7 @@ The Helm chart was initialised using a link:https://github.com/alexandreroman/sp
 
 = Usage
 
-== Run Pipeline
+== Run Pipeline - helm-pipeline.sh
 
 Script to create a project and install the sample spring-hello-world-app Helm chart to it. It takes the name of a project and a `"Release name"`. All Helm chart installations are known as `"Releases"` and the resulting resources will be known as `"$RELEASE_NAME-$CHART_NAME"`. The script will run the app through 3 different stages, performing a dev, test and prod deployment.
 
@@ -243,4 +243,25 @@ springProfilesActive: dev || test || prod
 
 === Helm Templates
 
-Templates generate manifest files, which are YAML-formatted resource descriptions that Kubernetes can understand. 
+Templates generate manifest files, which are YAML-formatted resource descriptions that Kubernetes can understand. The hello-world-app creates several manifests from templates which allow the app to be functional on Openshift.
+
+. `configmap.yaml` - Builds a configmap which specifies the Application.yml file. This contains our config for our spring app. (similar to application.properties).
+. `deployment.yaml` - Builds our app deployment template. The Deployment describes a desired state, and the Deployment Controller changes the actual state to the desired state at a controlled rate.
+. `ingress.yaml` - Builds the apps ingress object. This will manage the apps external access to the services in a cluster.
+. `rbac.yaml` Specifies the Role Based Access Control for the app. This specifies the permissions and accessibility our app has within the cluster. RBAC rules are generally applied to a serviceaccount. For this deployment we use the `default` serviceaccount.
+. `service.yaml` - Builds the apps service object. This will manage the apps internal access within the cluster.
+
+== Pipeline - helm-pipeline.sh 
+
+=== Flow
+
+The pipeline begins by taking the project name and project release name as arguments. It will then initialise 3 projects to simulate 3 clusters (a dev, test and prod cluster). An installation flow goes as follows.
+
+. Execute the shell script and takes the project name and release name as arguments
+. Sets enviornment variables
+. Runs the init function which switches to the correct project (or creates a new one if it doesn't exist), creates the docker-registry pull secret, links the pull secret with the deafult service account and finally sets the kubeconfig to the correct context.
+. Runs the install function with an argument of dev.
+. Runs the chart_test function on dev to check the chart has deployed correctly. This uses `helm test` to achieve this.
+. Runs the app_test function to check the expected deployed string against the actual.
+. Repeats step 4,5,6 with the arguments test and prod
+
