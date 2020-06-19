@@ -246,3 +246,6 @@ config:
 
 IMPORTANT: 1. Make sure to change the image repository and tag if you've rebuilt and pushed the image to your local image repository.
 
+=== Helm Templates
+
+Helm templates are based off of GoLang templates.
