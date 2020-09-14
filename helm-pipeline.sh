@@ -22,7 +22,7 @@ export AWS_DEFAULT_REGION=eu-west-1
 
 # Create Image Pull Secret for AWS ECR registry
 export SECRET_NAME=aws-ecr-pull-secret
-export DOCKER_REGISTRY_SERVER=014056181913.dkr.ecr.eu-west-1.amazonaws.com/cmpp-workers
+export DOCKER_REGISTRY_SERVER=
 export DOCKER_USER=AWS
 export DOCKER_PASSWORD=$(aws ecr get-login-password --region eu-west-1)
 

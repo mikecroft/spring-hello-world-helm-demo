@@ -18,7 +18,7 @@ service:
   type: LoadBalancer
   port: 8080
 
-ingressBase: apps.openshift.ebms.tv
+ingressBase: mike-ocp-4-459768-8e403d02da27f23cda259248b817e83d-0000.eu-gb.containers.appdomain.cloud
 ingress:
   enabled: true
   annotations: {}
