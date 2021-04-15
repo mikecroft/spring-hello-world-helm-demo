@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository: mikecroft/spring-hello-world-app
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 # Set image pull secrets (in case you're using a private container registry).
 imageCredentials:
